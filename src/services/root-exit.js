@@ -70,7 +70,7 @@ export const getExitsFromSubgraph = async(start) => {
 export const checkExitTransactionIfReplaced = async(reqParams) => {
   try {
     let { transactionHash: initialTransactionHash, userAddress } = reqParams.query
-    let initialTransactionHash = initialTransactionHash.toLowerCase()
+    initialTransactionHash = initialTransactionHash.toLowerCase()
     const { nonce: initialNonce } = await mainnetWeb3.eth.getTransaction(initialTransactionHash)
     const rootExit = await RootExits.findOne({ nonce: initialNonce, userAddress })
     let response
