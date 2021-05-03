@@ -75,8 +75,8 @@ const initialise = async() => {
     console.log("error in syncing root exits")
   }
 
-  schedule('*/1 * * * *', getAndSavePosDepositTransactions)
-  schedule('*/1 * * * *', getAndSavePosExitTransactions)
+  schedule('*/20 * * * *', getAndSavePosDepositTransactions)
+  schedule('*/20 * * * *', getAndSavePosExitTransactions)
 }
 
 initialise()

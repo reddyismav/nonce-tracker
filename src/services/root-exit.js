@@ -9,7 +9,7 @@ const Web3 = require('web3')
 export const getAndSavePosExitTransactions = async() => {
   try {
     const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    await RootExits.deleteMany({ _id: { $ne: null}});
+    // await RootExits.deleteMany({ _id: { $ne: null}});
     let start = await RootExits.countDocuments()
     let findMore = true
 
@@ -72,7 +72,8 @@ export const checkExitTransactionIfReplaced = async(reqParams) => {
     const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
     let { transactionHash: initialTransactionHash, userAddress } = reqParams.query
     initialTransactionHash = initialTransactionHash.toLowerCase()
-    const { nonce: initialNonce } = await mainnetWeb3.eth.getTransaction(initialTransactionHash)
+    const transactionDetails = await mainnetWeb3.eth.getTransaction(initialTransactionHash)
+    const { nonce: initialNonce } = transactionDetails
     const rootExit = await RootExits.findOne({ nonce: initialNonce, userAddress })
     let response
     if (rootExit) {
