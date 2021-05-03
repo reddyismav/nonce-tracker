@@ -8,6 +8,7 @@ const Web3 = require('web3')
 export const getAndSavePosDepositTransactions = async() => {
   try {
     const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
+    await RootDeposits.deleteMany({ _id: { $ne: null}});
     let start = await RootDeposits.countDocuments()
     let findMore = true
 
@@ -71,12 +72,14 @@ export const getDepositsFromSubgraph = async(start) => {
 
 export const checkDepositTransactionIfReplaced = async(reqParams) => {
   try {
-    const { transactionHash: initialTransactionHash, userAddress } = reqParams.query
+    let { transactionHash: initialTransactionHash, userAddress } = reqParams.query
+    initialTransactionHash = initialTransactionHash.toLowerCase()
     const { nonce: initialNonce } = await mainnetWeb3.eth.getTransaction(initialTransactionHash)
     const rootDeposit = await RootDeposits.findOne({ nonce: initialNonce, userAddress })
     let response
     if (rootDeposit) {
-      const { transactionHash } = rootDeposit
+      let { transactionHash } = rootDeposit
+      transactionHash = transactionHash.toLowerCase()
       if (transactionHash === initialTransactionHash) {
         response = {
           success: true,

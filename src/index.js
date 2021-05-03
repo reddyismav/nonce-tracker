@@ -61,12 +61,12 @@ app.listen(process.env.PORT, function() {
 
 // Initialisation and Syncing Function
 const initialise = async() => {
-  // try {
-  //   await getAndSavePosDepositTransactions()
-  //   console.log("Syncing of Deposits done")
-  // } catch (error) {
-  //   console.log("error in syncing root deposits")
-  // }
+  try {
+    await getAndSavePosDepositTransactions()
+    console.log("Syncing of Deposits done")
+  } catch (error) {
+    console.log("error in syncing root deposits")
+  }
 
   try {
     await getAndSavePosExitTransactions()
