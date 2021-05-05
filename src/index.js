@@ -14,6 +14,7 @@ const swaggerUi = require('swagger-ui-express')
 const { schedule } = require('node-cron')
 const { getAndSavePosDepositTransactions } = require('./services/root-deposit')
 const { getAndSavePosExitTransactions } = require('./services/root-exit')
+const { getAndSavePlasmaExits } = require('./services/plasma-exits')
 
 export const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
 
@@ -61,22 +62,28 @@ app.listen(process.env.PORT, function() {
 
 // Initialisation and Syncing Function
 const initialise = async() => {
-  try {
-    await getAndSavePosDepositTransactions()
-    console.log("Syncing of Deposits done")
-  } catch (error) {
-    console.log("error in syncing root deposits")
-  }
+  // try {
+  //   await getAndSavePosDepositTransactions()
+  //   console.log("Syncing of Deposits done")
+  // } catch (error) {
+  //   console.log("error in syncing root deposits")
+  // }
+
+  // try {
+  //   await getAndSavePosExitTransactions()
+  //   console.log("Syncing of Exits done")
+  // } catch (error) {
+  //   console.log("error in syncing root exits")
+  // }
 
   try {
-    await getAndSavePosExitTransactions()
-    console.log("Syncing of Exits done")
+    await getAndSavePlasmaExits()
   } catch (error) {
-    console.log("error in syncing root exits")
+    console.log("error in syncing plasma exits")
   }
 
-  schedule('*/20 * * * *', getAndSavePosDepositTransactions)
-  schedule('*/20 * * * *', getAndSavePosExitTransactions)
+  // schedule('*/20 * * * *', getAndSavePosDepositTransactions)
+  // schedule('*/20 * * * *', getAndSavePosExitTransactions)
 }
 
 initialise()

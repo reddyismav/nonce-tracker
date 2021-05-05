@@ -3,13 +3,13 @@ const { request, gql } = require('graphql-request')
 const { mainnetWeb3 } = require('../index')
 require('dotenv').config()
 const Web3 = require('web3')
-
+const { mapWithdrawTxToBurnTx } = require('./decoder')
 
 // Save Exit Transaction from Subgraph with nonces
 export const getAndSavePosExitTransactions = async() => {
   try {
-    const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    // await RootExits.deleteMany({ _id: { $ne: null}});
+    // const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
+    await RootExits.deleteMany({ _id: { $ne: null}});
     let start = await RootExits.countDocuments()
     let findMore = true
 
@@ -27,15 +27,13 @@ export const getAndSavePosExitTransactions = async() => {
           timestamp,
           counter
         } = exit
-        const transactionDetails = await mainnetWeb3.eth.getTransaction(transactionHash)
-        const { nonce, from: userAddress } = transactionDetails
-        console.log("nonce", nonce, userAddress)
+        const burnTransactionResult = await mapWithdrawTxToBurnTx(transactionHash, true)
+        if (!burnTransactionResult) throw new Error("error in getting burntransaction")
+        const burnTransactionHash = burnTransactionResult.result.toLowerCase()
         const data = {
           transactionHash,
+          burnTransactionHash,
           timestamp,
-          userAddress,
-          counter,
-          nonce
         }
         datatoInsert.push(data)
         console.log('Exit counter', counter)
@@ -69,35 +67,21 @@ export const getExitsFromSubgraph = async(start) => {
 
 export const checkExitTransactionIfReplaced = async(reqParams) => {
   try {
-    const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    let { transactionHash: initialTransactionHash, userAddress } = reqParams.query
-    initialTransactionHash = initialTransactionHash.toLowerCase()
-    const transactionDetails = await mainnetWeb3.eth.getTransaction(initialTransactionHash)
-    const { nonce: initialNonce } = transactionDetails
-    const rootExit = await RootExits.findOne({ nonce: initialNonce, userAddress })
+    let { burnTransactionHash } = reqParams.query
+    burnTransactionHash = burnTransactionHash.toLowerCase()
+    const rootExit = await RootExits.findOne({ burnTransactionHash })
     let response
     if (rootExit) {
-      let { transactionHash } = rootExit
-      transactionHash = transactionHash.toLowerCase()
-      if (transactionHash === initialTransactionHash) {
-        response = {
-          success: true,
-          status: 1,
-          initialTransactionHash,
-          transactionHash: null
-        }
-      } else {
-        response = {
-          success: true,
-          status: 2,
-          initialTransactionHash,
-          transactionHash
-        }
+      const { transactionHash } = rootExit
+      response = {
+        success: true,
+        result: transactionHash,
+        status: 1
       }
     } else {
       response = {
         success: false,
-        status: 3,
+        status: 2,
         message: 'transaction might still be pending as subgraph did not pick this data up.'
       }
     }

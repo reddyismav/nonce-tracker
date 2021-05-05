@@ -5,15 +5,6 @@ const RootDepositSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  nonce: {
-    type: Number,
-    required: false,
-    default: -1
-  },
-  timestamp: {
-    type: Number,
-    required: false
-  },
   userAddress: {
     type: String,
     required: true
@@ -22,9 +13,25 @@ const RootDepositSchema = mongoose.Schema({
     type: String,
     required: false
   },
+  amount: {
+    type: String,
+    required: false
+  },
   counter: {
     type: Number,
     required: true
+  },
+  isResolved: {
+    type: Boolean,
+    default: false,
+  },
+  resolveTransaction: {
+    type: String,
+    required: false,
+  },
+  blockNumber: {
+    type: Number,
+    required: false,
   }
 })
 

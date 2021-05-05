@@ -3,12 +3,14 @@ const { request, gql } = require('graphql-request')
 // const { mainnetWeb3 } = require('../index')
 require('dotenv').config()
 const Web3 = require('web3')
+const { ROOT_CHAIN_MANAGER_ABI, WITHDRAW_MANAGER_ABI } = require('../constants')
+const { getParsedTxDataFromAbiDecoder } = require('./decoder')
 
 // Save Deposit Transaction from Subgraph with nonces
 export const getAndSavePosDepositTransactions = async() => {
   try {
-    const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    // await RootDeposits.deleteMany({ _id: { $ne: null}});
+    const mainnetWeb3 = new Web3(process.env.ETH_NETWORK_PROVIDER)
+    await RootDeposits.deleteMany({ _id: { $ne: null}});
     let start = await RootDeposits.countDocuments()
     let findMore = true
 
@@ -28,17 +30,38 @@ export const getAndSavePosDepositTransactions = async() => {
           rootToken,
           counter
         } = deposit
-        const transactionDetails = await mainnetWeb3.eth.getTransaction(transactionHash)
-        const { nonce } = transactionDetails
-        const data = {
-          transactionHash,
-          timestamp,
-          userAddress,
-          rootToken,
-          counter,
-          nonce
+        const transactionDetails = await mainnetWeb3.eth.getTransactionReceipt(transactionHash)
+        console.log("transactionDetails", transactionDetails)
+        const { input, blockNumber } = transactionDetails
+        const decodedAbiDataResponse = await getParsedTxDataFromAbiDecoder(input, ROOT_CHAIN_MANAGER_ABI.abi)
+        if (!decodedAbiDataResponse.success) throw new Error('error in decoding abi')
+        const decodedInputData = decodedAbiDataResponse.result
+        let data;
+        if (decodedInputData) {
+          const depositData = decodedInputData.params[2].value
+          const amount = await mainnetWeb3.eth.abi.decodeParameter('uint256', depositData).toString();
+          data = {
+            transactionHash,
+            timestamp,
+            userAddress: userAddress.toLowerCase(),
+            rootToken,
+            amount,
+            counter,
+            blockNumber,
+          }
+          datatoInsert.push(data)
+        } else {
+          data = {
+            transactionHash,
+            timestamp,
+            userAddress: userAddress.toLowerCase(),
+            rootToken,
+            // amount,
+            counter,
+            blockNumber,
+            cannotBeDecoded,
+          }
         }
-        datatoInsert.push(data)
         console.log('Deposit counter', counter)
       }
 
@@ -73,31 +96,15 @@ export const getDepositsFromSubgraph = async(start) => {
 export const checkDepositTransactionIfReplaced = async(reqParams) => {
   try {
     const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    let { transactionHash: initialTransactionHash, userAddress } = reqParams.query
-    initialTransactionHash = initialTransactionHash.toLowerCase()
-    console.log('iniitial', initialTransactionHash);
-    const transactionDetails = await mainnetWeb3.eth.getTransaction(initialTransactionHash)
-    console.log(transactionDetails);
-    const { nonce: initialNonce } = transactionDetails
-    const rootDeposit = await RootDeposits.findOne({ nonce: initialNonce, userAddress })
+    let { transactionHash: initialTransactionHash, userAddress, amount } = reqParams.query
+    const rootDeposit = await RootDeposits.findOne({ userAddress, amount, rootToken, isResolved: false })
     let response
     if (rootDeposit) {
-      let { transactionHash } = rootDeposit
-      transactionHash = transactionHash.toLowerCase()
-      if (transactionHash === initialTransactionHash) {
-        response = {
-          success: true,
-          status: 1,
-          initialTransactionHash,
-          transactionHash: null
-        }
-      } else {
-        response = {
-          success: true,
-          status: 2,
-          initialTransactionHash,
-          transactionHash
-        }
+      const { transactionHash } = rootDeposit
+      response = {
+        success: true,
+        initialTransactionHash,
+        newTransactionHash: transactionHash,
       }
     } else {
       response = {

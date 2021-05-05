@@ -5,10 +5,9 @@ const RootExitSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  nonce: {
-    type: Number,
-    required: false,
-    default: -1
+  burnTransactionHash: {
+    type: String,
+    required: true
   },
   timestamp: {
     type: Number,
@@ -16,11 +15,11 @@ const RootExitSchema = mongoose.Schema({
   },
   userAddress: {
     type: String,
-    required: true
+    required: false
   },
   counter: {
     type: Number,
-    required: true
+    required: false
   }
 })
 
