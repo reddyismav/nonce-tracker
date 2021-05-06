@@ -76,14 +76,19 @@ export const getParsedTxDataFromAbiDecoder =   async(inputData, abi) => {
 const rlpDecodeData = async(data) => {
     try {
       const decodedBuffer = rlp.decode(data.params[0].value)
-      // console.log("djasndjlansjldna",decodedBuffer);
+      console.log("djasndjlansjldna",decodedBuffer);
       const blockNumber = parseInt(decodedBuffer[2].toString('hex'), 16)
       // console.log("xyz", blockNumber)
       // const rlpDecodedTransactionIndex
       const receiptPath = decodedBuffer[8];
       const formattedBuffer = receiptPath.slice(1,receiptPath.length)
-      let transactionIndex = parseInt(rlp.decode(formattedBuffer).toString('hex'), 16)
-      // console.log("xyz", transactionIndex)
+      let transactionIndex
+      if (formattedBuffer.toString('hex') === '80') {
+        transactionIndex = 0
+      } else {
+        transactionIndex = parseInt(rlp.decode(formattedBuffer).toString('hex'), 16)
+      }
+      console.log("xyz", transactionIndex)
       // if (transactionIndex === 80) {
       //     transactionIndex = 0
       // }
@@ -101,3 +106,4 @@ const rlpDecodeData = async(data) => {
       }
     }
 }
+
