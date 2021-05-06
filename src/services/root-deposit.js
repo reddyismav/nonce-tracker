@@ -13,6 +13,7 @@ export const getAndSavePosDepositTransactions = async() => {
     await RootDeposits.deleteMany({ _id: { $ne: null}});
     let start = await RootDeposits.countDocuments()
     let findMore = true
+    console.log(start)
 
     while (findMore) {
       let deposits = await getDepositsFromSubgraph(start)
@@ -30,8 +31,8 @@ export const getAndSavePosDepositTransactions = async() => {
           rootToken,
           counter
         } = deposit
-        const transactionDetails = await mainnetWeb3.eth.getTransactionReceipt(transactionHash)
-        console.log("transactionDetails", transactionDetails)
+        const transactionDetails = await mainnetWeb3.eth.getTransaction(transactionHash)
+        // console.log("transactionDetails", transactionDetails)
         const { input, blockNumber } = transactionDetails
         const decodedAbiDataResponse = await getParsedTxDataFromAbiDecoder(input, ROOT_CHAIN_MANAGER_ABI.abi)
         if (!decodedAbiDataResponse.success) throw new Error('error in decoding abi')
@@ -48,6 +49,7 @@ export const getAndSavePosDepositTransactions = async() => {
             amount,
             counter,
             blockNumber,
+            isDecoded: true,
           }
           datatoInsert.push(data)
         } else {
@@ -59,7 +61,7 @@ export const getAndSavePosDepositTransactions = async() => {
             // amount,
             counter,
             blockNumber,
-            cannotBeDecoded,
+            isDecoded: false,
           }
         }
         console.log('Deposit counter', counter)

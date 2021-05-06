@@ -9,7 +9,7 @@ const { mapWithdrawTxToBurnTx } = require('./decoder')
 export const getAndSavePosExitTransactions = async() => {
   try {
     // const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    await RootExits.deleteMany({ _id: { $ne: null}});
+    // await RootExits.deleteMany({ _id: { $ne: null}});
     let start = await RootExits.countDocuments()
     let findMore = true
 
@@ -27,7 +27,7 @@ export const getAndSavePosExitTransactions = async() => {
           timestamp,
           counter
         } = exit
-        const burnTransactionResult = await mapWithdrawTxToBurnTx(transactionHash, true)
+        const burnTransactionResult = await mapWithdrawTxToBurnTx(transactionHash, true, null, true)
         if (!burnTransactionResult) throw new Error("error in getting burntransaction")
         const burnTransactionHash = burnTransactionResult.result.toLowerCase()
         const data = {

@@ -5,7 +5,7 @@ const rlp = require('rlp')
 const { ROOT_CHAIN_MANAGER_ABI, ERC721_PREDICATE_ABI, ERC20_PREDICATE_ABI } = require('../constants')
 const Web3 = require('web3')
 
-export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=null) => {
+export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=null, isExit=false) => {
     try {
     //   const { transactionHash } = event
         const web3 = new Web3(process.env.ETH_NETWORK_PROVIDER)
@@ -31,6 +31,10 @@ export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=nul
         if (!decodedAbiDataResponse.success) throw new Error('error in decoding abi')
         const decodedInputData = decodedAbiDataResponse.result
         // console.log("decodedInputData",decodedInputData);
+
+        if (isExit && decodedInputData.name!=='exit') {
+          return { success: true, result: "not-decoded"}
+        }
     
         // RLP decode the decoded abi data
         const rlpDecodedDataResponse = await rlpDecodeData(decodedInputData)
@@ -71,7 +75,9 @@ export const getParsedTxDataFromAbiDecoder =   async(inputData, abi) => {
 const rlpDecodeData = async(data) => {
     try {
       const decodedBuffer = rlp.decode(data.params[0].value)
+      console.log("djasndjlansjldna",decodedBuffer);
       const blockNumber = parseInt(decodedBuffer[2].toString('hex'), 16)
+      console.log("xyz", blockNumber)
       let transactionIndex = parseInt(decodedBuffer[8].toString('hex'), 10)
 
       if (transactionIndex === 80) {

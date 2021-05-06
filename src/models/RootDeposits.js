@@ -32,6 +32,10 @@ const RootDepositSchema = mongoose.Schema({
   blockNumber: {
     type: Number,
     required: false,
+  },
+  isDecoded: {
+    type: Boolean,
+    required: false
   }
 })
 
