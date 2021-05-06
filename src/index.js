@@ -87,9 +87,10 @@ const initialise = async() => {
   } catch (error) {
     console.log("error in syncing root deposits")
   }
-
-  // schedule('*/20 * * * *', getAndSavePosDepositTransactions)
-  // schedule('*/20 * * * *', getAndSavePosExitTransactions)
+  schedule('0/1 * * *', getAndSavePlasmaExits)
+  schedule('0/10', getAndSaveDepositEtherTransaction)
+  schedule('0/5 * * * *', getAndSavePosDepositTransactions)
+  schedule('0/2 * * * *', getAndSavePosExitTransactions)
 }
 
 initialise()
