@@ -1,4 +1,5 @@
 const RootDeposits = require('../models/RootDeposits')
+const RootDepositEther = require('../models/RootDepositsEther')
 const { request, gql } = require('graphql-request')
 // const { mainnetWeb3 } = require('../index')
 require('dotenv').config()
@@ -13,7 +14,7 @@ export const getAndSavePosDepositTransactions = async() => {
     await RootDeposits.deleteMany({ _id: { $ne: null}});
     let start = await RootDeposits.countDocuments()
     let findMore = true
-    console.log(start)
+    // console.log(start)
 
     while (findMore) {
       let deposits = await getDepositsFromSubgraph(start)
@@ -33,25 +34,40 @@ export const getAndSavePosDepositTransactions = async() => {
         } = deposit
         const transactionDetails = await mainnetWeb3.eth.getTransaction(transactionHash)
         // console.log("transactionDetails", transactionDetails)
-        const { input, blockNumber } = transactionDetails
-        const decodedAbiDataResponse = await getParsedTxDataFromAbiDecoder(input, ROOT_CHAIN_MANAGER_ABI.abi)
-        if (!decodedAbiDataResponse.success) throw new Error('error in decoding abi')
-        const decodedInputData = decodedAbiDataResponse.result
+        const { input, blockNumber, from: fromAddress } = transactionDetails
         let data;
-        if (decodedInputData) {
-          const depositData = decodedInputData.params[2].value
-          const amount = await mainnetWeb3.eth.abi.decodeParameter('uint256', depositData).toString();
-          data = {
-            transactionHash,
-            timestamp,
-            userAddress: userAddress.toLowerCase(),
-            rootToken,
-            amount,
-            counter,
-            blockNumber,
-            isDecoded: true,
+        const code = await mainnetWeb3.eth.getCode(fromAddress)
+        if (code === '0x') {
+          const decodedAbiDataResponse = await getParsedTxDataFromAbiDecoder(input, ROOT_CHAIN_MANAGER_ABI.abi)
+          if (!decodedAbiDataResponse.success) throw new Error('error in decoding abi')
+          const decodedInputData = decodedAbiDataResponse.result
+          if (decodedInputData) {
+            const depositData = decodedInputData.params[2].value
+            const amount = await mainnetWeb3.eth.abi.decodeParameter('uint256', depositData).toString();
+            data = {
+              transactionHash,
+              timestamp,
+              userAddress: userAddress.toLowerCase(),
+              rootToken,
+              amount,
+              counter,
+              blockNumber,
+              isDecoded: true,
+            }
+            datatoInsert.push(data)
+          } else {
+            data = {
+              transactionHash,
+              timestamp,
+              userAddress: userAddress.toLowerCase(),
+              rootToken,
+              // amount,
+              counter,
+              blockNumber,
+              isDecoded: false,
+            }
+            datatoInsert.push(data)
           }
-          datatoInsert.push(data)
         } else {
           data = {
             transactionHash,
@@ -63,6 +79,7 @@ export const getAndSavePosDepositTransactions = async() => {
             blockNumber,
             isDecoded: false,
           }
+          datatoInsert.push(data)
         }
         console.log('Deposit counter', counter)
       }
@@ -90,6 +107,27 @@ export const getDepositsFromSubgraph = async(start) => {
         }`
     const resp = await request(process.env.SUBGRAPH_ENDPOINT, query)
     return resp.rootDeposits
+  } catch (error) {
+    console.log('error in getting deposits from subgraph', error)
+  }
+}
+
+export const getDepositsEthersFromSubgraph = async(start) => {
+  try {
+    const limit = 1000
+    const direction = 'asc'
+    const sortBy = 'counter'
+    const query = gql`query{
+      rootDepositEthers(first:${limit}, where:{ counter_gt: ${start}}, orderDirection:${direction}, orderBy:${sortBy}) {
+            transactionHash,
+            user,
+            value,
+            counter,
+            timestamp,
+        }
+        }`
+    const resp = await request(process.env.SUBGRAPH_ENDPOINT, query)
+    return resp.rootDepositEthers
   } catch (error) {
     console.log('error in getting deposits from subgraph', error)
   }
@@ -123,5 +161,49 @@ export const checkDepositTransactionIfReplaced = async(reqParams) => {
       error: error.message
     }
     return response
+  }
+}
+
+export const getAndSaveDepositEtherTransaction = async () => {
+  try {
+    const mainnetWeb3 = new Web3(process.env.ETH_NETWORK_PROVIDER)
+    await RootDepositEther.deleteMany({ _id: { $ne: null}});
+    let start = await RootDepositEther.countDocuments()
+    let findMore = true
+    console.log(start)
+
+    while (findMore) {
+      let deposits = await getDepositsEthersFromSubgraph(start)
+      if (deposits.length === 1000) {
+        start = start + 1000
+      } else {
+        findMore = false
+      }
+      const datatoInsert = []
+      for (const deposit of deposits) {
+        const {
+          transactionHash,
+          timestamp,
+          user: userAddress,
+          value: amount,
+          counter
+        } = deposit
+
+        const data = {
+          transactionHash,
+          timestamp,
+          userAddress,
+          amount,
+          counter,
+          isResolved: false,
+        }
+        datatoInsert.push(data)
+        console.log('Deposit counter', counter)
+      }
+
+      await RootDepositEther.insertMany(datatoInsert)
+    }
+  } catch (error) {
+    console.log("error in get and save deposit ether transactions", error)
   }
 }

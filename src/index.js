@@ -12,7 +12,7 @@ import routes from './routes'
 const swaggerJsDoc = require('swagger-jsdoc')
 const swaggerUi = require('swagger-ui-express')
 const { schedule } = require('node-cron')
-const { getAndSavePosDepositTransactions } = require('./services/root-deposit')
+const { getAndSavePosDepositTransactions, getAndSaveDepositEtherTransaction } = require('./services/root-deposit')
 const { getAndSavePosExitTransactions } = require('./services/root-exit')
 const { getAndSavePlasmaExits } = require('./services/plasma-exits')
 
@@ -63,10 +63,15 @@ app.listen(process.env.PORT, function() {
 // Initialisation and Syncing Function
 const initialise = async() => {
   try {
-    await getAndSavePosDepositTransactions()
-    console.log("Syncing of Deposits done")
+    await getAndSavePlasmaExits()
   } catch (error) {
-    console.log("error in syncing root deposits")
+    console.log("error in syncing plasma exits")
+  }
+
+  try {
+    await getAndSaveDepositEtherTransaction()
+  } catch (error) {
+    console.log("error in getether", error)
   }
 
   try {
@@ -77,9 +82,10 @@ const initialise = async() => {
   }
 
   try {
-    await getAndSavePlasmaExits()
+    await getAndSavePosDepositTransactions()
+    console.log("Syncing of Deposits done")
   } catch (error) {
-    console.log("error in syncing plasma exits")
+    console.log("error in syncing root deposits")
   }
 
   // schedule('*/20 * * * *', getAndSavePosDepositTransactions)

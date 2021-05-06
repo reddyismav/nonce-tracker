@@ -24,7 +24,7 @@ export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=nul
         // Get Transaction from transaction hash
         const confirmWithdrawTransaction = await web3.eth.getTransaction(transactionHash)
         const { input } = confirmWithdrawTransaction
-        // console.log("input", input);
+        // console.log("tx",transactionHash)
   
         // Decode the data using abi decoder
         const decodedAbiDataResponse = await getParsedTxDataFromAbiDecoder(input, abi)
@@ -32,7 +32,11 @@ export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=nul
         const decodedInputData = decodedAbiDataResponse.result
         // console.log("decodedInputData",decodedInputData);
 
-        if (isExit && decodedInputData.name!=='exit') {
+        if (isExit && decodedInputData && decodedInputData.name!=='exit') {
+          return { success: true, result: "not-decoded"}
+        }
+
+        if (!decodedInputData ) {
           return { success: true, result: "not-decoded"}
         }
     
@@ -46,7 +50,7 @@ export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=nul
         const blockData = await maticWeb3.eth.getBlock(blockNumber)
         // console.log(blockData);
         const { transactions, timestamp } = blockData;
-        console.log(transactions.length)
+        // console.log(transactions.length)
         const burnTransaction = transactions[transactionIndex];
 
         return { success: true, result: burnTransaction, timestamp}
@@ -59,6 +63,7 @@ export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=nul
 export const getParsedTxDataFromAbiDecoder =   async(inputData, abi) => {
     try {
       abiDecoder.addABI(abi)
+      // console.log("ip",inputData)
       const decodedData = abiDecoder.decodeMethod(inputData)
       return {
         success: true,
@@ -76,7 +81,7 @@ export const getParsedTxDataFromAbiDecoder =   async(inputData, abi) => {
 const rlpDecodeData = async(data) => {
     try {
       const decodedBuffer = rlp.decode(data.params[0].value)
-      console.log("djasndjlansjldna",decodedBuffer);
+      // console.log("djasndjlansjldna",decodedBuffer);
       const blockNumber = parseInt(decodedBuffer[2].toString('hex'), 16)
       // console.log("xyz", blockNumber)
       // const rlpDecodedTransactionIndex
@@ -88,7 +93,7 @@ const rlpDecodeData = async(data) => {
       } else {
         transactionIndex = parseInt(rlp.decode(formattedBuffer).toString('hex'), 16)
       }
-      console.log("xyz", transactionIndex)
+      // console.log("transactionIndex", transactionIndex)
       // if (transactionIndex === 80) {
       //     transactionIndex = 0
       // }

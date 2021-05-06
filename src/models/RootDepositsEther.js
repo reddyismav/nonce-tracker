@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const RootDepositSchema = mongoose.Schema({
+const RootDepositEtherSchema = mongoose.Schema({
   transactionHash: {
     type: String,
     required: true
@@ -8,10 +8,6 @@ const RootDepositSchema = mongoose.Schema({
   userAddress: {
     type: String,
     required: true
-  },
-  rootToken: {
-    type: String,
-    required: false
   },
   amount: {
     type: String,
@@ -29,18 +25,10 @@ const RootDepositSchema = mongoose.Schema({
     type: String,
     required: false,
   },
-  blockNumber: {
-    type: Number,
-    required: false,
-  },
   timestamp: {
     type: Number,
     required: false,
   },
-  isDecoded: {
-    type: Boolean,
-    required: false
-  },
 })
 
-module.exports = mongoose.model('RootDeposits', RootDepositSchema)
+module.exports = mongoose.model('RootDepositsEther', RootDepositEtherSchema)
