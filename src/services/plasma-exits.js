@@ -38,7 +38,8 @@ export const getAndSavePlasmaExits = async () => {
         ERC721TokenSet.add("0x96cddf45c0cd9a59876a2a29029d7c54f6e54ad3");
         ERC20TokenSet.add("0xa45b966996374e9e65ab991c6fe4bfce3a56dde8");
         await PlasmaExits.deleteMany({ _id: { $ne: null}});
-        let start = await PlasmaExits.countDocuments()
+        let start = 1093
+        // let start = await PlasmaExits.countDocuments()
         let findMore = true
         while (findMore) {
             let plasmaExits = await getPlasmaExitsFromSubgraph(start)

@@ -46,8 +46,9 @@ export const mapWithdrawTxToBurnTx = async(transactionHash, isPos, tokenType=nul
         const blockData = await maticWeb3.eth.getBlock(blockNumber)
         // console.log(blockData);
         const { transactions, timestamp } = blockData;
+        console.log(transactions.length)
         const burnTransaction = transactions[transactionIndex];
-    
+
         return { success: true, result: burnTransaction, timestamp}
     } catch (error) {
       console.log('error in mapwithdrawTxtoBurnTx', error)
@@ -75,14 +76,17 @@ export const getParsedTxDataFromAbiDecoder =   async(inputData, abi) => {
 const rlpDecodeData = async(data) => {
     try {
       const decodedBuffer = rlp.decode(data.params[0].value)
-      console.log("djasndjlansjldna",decodedBuffer);
+      // console.log("djasndjlansjldna",decodedBuffer);
       const blockNumber = parseInt(decodedBuffer[2].toString('hex'), 16)
-      console.log("xyz", blockNumber)
-      let transactionIndex = parseInt(decodedBuffer[8].toString('hex'), 10)
-
-      if (transactionIndex === 80) {
-          transactionIndex = 0
-      }
+      // console.log("xyz", blockNumber)
+      // const rlpDecodedTransactionIndex
+      const receiptPath = decodedBuffer[8];
+      const formattedBuffer = receiptPath.slice(1,receiptPath.length)
+      let transactionIndex = parseInt(rlp.decode(formattedBuffer).toString('hex'), 16)
+      // console.log("xyz", transactionIndex)
+      // if (transactionIndex === 80) {
+      //     transactionIndex = 0
+      // }
       return {
         success: true,
         result: {
