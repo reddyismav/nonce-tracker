@@ -26,7 +26,7 @@ const mongoose = require('mongoose')
 if (process.env.NODE_ENV === 'local') {
   mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }).then(console.log('Connected to DB'))
 } else {
-  mongoose.connect(process.env.MONGO_CONNECTION, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, sslCA: [fs.readFileSync('rds-combined-ca-bundle.pem')] }).then(console.log('Connected to DB'))
+  mongoose.connect(process.env.MONGO_CONNECTION_PROD, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, sslCA: [fs.readFileSync('rds-combined-ca-bundle.pem')] }).then(console.log('Connected to DB'))
 }
 
 // created express server
