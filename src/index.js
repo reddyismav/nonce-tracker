@@ -6,6 +6,8 @@ import Web3 from 'web3'
 
 // Routes
 import routes from './routes'
+import fs from 'fs'
+
 // import logger from './logger'
 
 // SWAGGER
