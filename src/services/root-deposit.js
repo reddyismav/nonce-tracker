@@ -48,7 +48,7 @@ export const getAndSavePosDepositTransactions = async() => {
               transactionHash,
               timestamp,
               userAddress: userAddress.toLowerCase(),
-              rootToken,
+              rootToken: rootToken.toLowerCase(),
               amount,
               counter,
               blockNumber,
@@ -136,20 +136,21 @@ export const getDepositsEthersFromSubgraph = async(start) => {
 export const checkDepositTransactionIfReplaced = async(reqParams) => {
   try {
     const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    let { transactionHash: initialTransactionHash, userAddress, amount } = reqParams.query
+    let { transactionHash: initialTransactionHash, userAddress, amount, isEther, rootToken } = reqParams.query
     const rootDeposit = await RootDeposits.findOne({ userAddress, amount, rootToken, isResolved: false })
     let response
     if (rootDeposit) {
       const { transactionHash } = rootDeposit
       response = {
         success: true,
+        status: 1,
         initialTransactionHash,
         newTransactionHash: transactionHash,
       }
     } else {
       response = {
         success: false,
-        status: 3,
+        status: 2,
         message: 'transaction might still be pending as subgraph did not pick this data up.'
       }
     }

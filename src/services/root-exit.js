@@ -67,7 +67,7 @@ export const getExitsFromSubgraph = async(start) => {
 
 export const checkExitTransactionIfReplaced = async(reqParams) => {
   try {
-    let { burnTransactionHash } = reqParams.query
+    let { burnTransactionHash, isPos } = reqParams.query
     burnTransactionHash = burnTransactionHash.toLowerCase()
     const rootExit = await RootExits.findOne({ burnTransactionHash })
     let response
