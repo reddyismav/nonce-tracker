@@ -1,12 +1,12 @@
 /* eslint-disable quotes,semi */
 import express from 'express'
 import bodyParser from 'body-parser'
+import fs from 'fs'
 import cors from 'cors'
 import Web3 from 'web3'
 
 // Routes
 import routes from './routes'
-import fs from 'fs'
 
 // import logger from './logger'
 
