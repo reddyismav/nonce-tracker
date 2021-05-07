@@ -69,16 +69,24 @@ export const getExitsFromSubgraph = async(start) => {
 export const checkExitTransactionIfReplaced = async(reqParams) => {
   try {
     let { burnTransactionHash, isPos } = reqParams.query
+    console.log(isPos, typeof(isPos))
     burnTransactionHash = burnTransactionHash.toLowerCase()
     let rootExit
-    if (isPos) {
+    if (isPos === 'true') {
+      console.log("pos")
       rootExit = await RootExits.findOne({ burnTransactionHash })
     } else {
+      console.log("plasma")
       rootExit = await PlasmaExits.findOne({ burnTransactionHash })
     }
     let response
     if (rootExit) {
-      const { transactionHash } = rootExit
+      let transactionHash
+      if (isPos === 'true') {
+        transactionHash = rootExit.transactionHash
+      } else {
+        transactionHash = rootExit.withdrawTxHash
+      }
       response = {
         success: true,
         result: transactionHash,

@@ -31,6 +31,8 @@ export const getAndSavePlasmaExits = async () => {
     try {
         const ERC20TokenSet = new Set();
         const ERC721TokenSet = new Set();
+        const y = await PlasmaExits.findOne({ burnTransactionHash:"0x26111e65d04f8799a0e37766d7cca2aebd411fcb169407c8af3600827de0eca9" });
+        console.log("yyyyyy", y);
         ERC721TokenSet.add("0x2c04e6dd23c33a66f58dfb79dfb15285336c92d0");
         ERC20TokenSet.add("0x3db715989da05c1d17441683b5b41d4510512722");
         ERC20TokenSet.add("0x6b175474e89094c44da98b954eedeac495271d0f");

@@ -137,15 +137,31 @@ export const checkDepositTransactionIfReplaced = async(reqParams) => {
   try {
     const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
     let { transactionHash: initialTransactionHash, userAddress, amount, isEther, rootToken } = reqParams.query
-    const rootDeposit = await RootDeposits.findOne({ userAddress, amount, rootToken, isResolved: false })
+    let rootDeposit
+    if (isEther === 'true') {
+      rootDeposit = await RootDepositEther.findOne({ resolveTransaction: initialTransactionHash, isResolved:true })
+      if (!rootDeposit) {
+        rootDeposit = await RootDepositEther.findOne({ userAddress, amount, isResolved: false })
+      }
+    } else {
+      rootDeposit = await RootDeposits.findOne({ resolveTransaction: initialTransactionHash, isResolved:true })
+      if (!rootDeposit) {
+        rootDeposit = await RootDeposits.findOne({ userAddress, amount, rootToken, isResolved: false })
+      }
+    }
     let response
     if (rootDeposit) {
-      const { transactionHash } = rootDeposit
+      const { transactionHash, counter } = rootDeposit
       response = {
         success: true,
         status: 1,
         initialTransactionHash,
         newTransactionHash: transactionHash,
+      }
+      if (isEther === 'true') {
+        await RootDepositEther.findOneAndUpdate({ counter }, { resolveTransaction: initialTransactionHash, isResolved: true })
+      } else {
+        await RootDeposits.findOneAndUpdate({ counter }, { resolveTransaction: initialTransactionHash, isResolved: true })
       }
     } else {
       response = {
