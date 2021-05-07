@@ -1,4 +1,5 @@
 const RootExits = require('../models/RootExits')
+const PlasmaExits = require('../models/PlasmaExits')
 const { request, gql } = require('graphql-request')
 const { mainnetWeb3 } = require('../index')
 require('dotenv').config()
@@ -69,7 +70,12 @@ export const checkExitTransactionIfReplaced = async(reqParams) => {
   try {
     let { burnTransactionHash, isPos } = reqParams.query
     burnTransactionHash = burnTransactionHash.toLowerCase()
-    const rootExit = await RootExits.findOne({ burnTransactionHash })
+    let rootExit
+    if (isPos) {
+      rootExit = await RootExits.findOne({ burnTransactionHash })
+    } else {
+      rootExit = await PlasmaExits.findOne({ burnTransactionHash })
+    }
     let response
     if (rootExit) {
       const { transactionHash } = rootExit

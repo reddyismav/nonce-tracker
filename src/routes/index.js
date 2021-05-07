@@ -3,7 +3,7 @@ const posExitRoutes = require('./pos-exits')
 const posDepositRoutes = require('./pos-deposits')
 
 const router = express.Router()
-router.use('/pos-exit', posExitRoutes)
-router.use('/pos-deposit', posDepositRoutes)
+router.use('/exit', posExitRoutes)
+router.use('/deposit', posDepositRoutes)
 
 module.exports = router

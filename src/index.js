@@ -23,7 +23,11 @@ export const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
 const mongoose = require('mongoose')
 
 // DB connection
-mongoose.connect(process.env.DB_CONNECTION, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, sslCA: [fs.readFileSync('rds-combined-ca-bundle.pem')] }).then(console.log('Connected to DB'))
+if (process.env.NODE_ENV === 'local') {
+  mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }).then(console.log('Connected to DB'))
+} else {
+  mongoose.connect(process.env.DB_CONNECTION, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, sslCA: [fs.readFileSync('rds-combined-ca-bundle.pem')] }).then(console.log('Connected to DB'))
+}
 
 // created express server
 const app = express()
