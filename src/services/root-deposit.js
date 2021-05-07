@@ -11,7 +11,6 @@ const { getParsedTxDataFromAbiDecoder } = require('./decoder')
 export const getAndSavePosDepositTransactions = async() => {
   try {
     const mainnetWeb3 = new Web3(process.env.ETH_NETWORK_PROVIDER)
-    await RootDeposits.deleteMany({ _id: { $ne: null}});
     let start = await RootDeposits.countDocuments()
     let findMore = true
     // console.log(start)
@@ -184,7 +183,6 @@ export const checkDepositTransactionIfReplaced = async(reqParams) => {
 export const getAndSaveDepositEtherTransaction = async () => {
   try {
     const mainnetWeb3 = new Web3(process.env.ETH_NETWORK_PROVIDER)
-    await RootDepositEther.deleteMany({ _id: { $ne: null}});
     let start = await RootDepositEther.countDocuments()
     let findMore = true
     console.log(start)

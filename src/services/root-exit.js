@@ -10,7 +10,6 @@ const { mapWithdrawTxToBurnTx } = require('./decoder')
 export const getAndSavePosExitTransactions = async() => {
   try {
     // const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
-    await RootExits.deleteMany({ _id: { $ne: null}});
     let start = await RootExits.countDocuments()
     let findMore = true
 
