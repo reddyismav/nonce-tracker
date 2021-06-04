@@ -90,7 +90,7 @@ export const checkExitTransactionIfReplaced = async(reqParams) => {
       response = {
         success: true,
         result: transactionHash,
-        rootExit,
+        rootExit: rootExit,
         status: 1
       }
     } else {
