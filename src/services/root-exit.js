@@ -79,6 +79,7 @@ export const checkExitTransactionIfReplaced = async(reqParams) => {
       rootExit = await PlasmaExits.findOne({ burnTransactionHash })
     }
     let response
+    let plasmaResponse
     if (rootExit) {
       let transactionHash
       if (isPos === 'true') {
@@ -89,6 +90,7 @@ export const checkExitTransactionIfReplaced = async(reqParams) => {
       response = {
         success: true,
         result: transactionHash,
+        rootExit,
         status: 1
       }
     } else {

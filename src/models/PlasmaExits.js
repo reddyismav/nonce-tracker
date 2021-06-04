@@ -16,6 +16,10 @@ const PlasmaExitsSchema = mongoose.Schema({
   counter: {
       type: Number,
       required: true,
+  },
+  exitTxHash: {
+    type: String,
+    required: true,
   }
 })
 

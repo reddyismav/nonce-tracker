@@ -48,7 +48,7 @@ export const getAndSavePlasmaExits = async () => {
             }
             const datatoInsert = [];
             for (const plasmaExit of plasmaExits) {
-                const { exitStartedTxHash, counter, token, exitId, exitStartedTimeStamp } = plasmaExit;
+                const { exitStartedTxHash, counter, token, exitId, exitStartedTimeStamp, exitCompletedTxHash } = plasmaExit;
                 let burnTransactionResult
                 if (ERC721TokenSet.has(token)) {
                     burnTransactionResult = await mapWithdrawTxToBurnTx(exitStartedTxHash, false, "ERC721")
@@ -65,6 +65,7 @@ export const getAndSavePlasmaExits = async () => {
                     counter,
                     exitableAt,
                     burnTransactionHash,
+                    exitTxHash: exitCompletedTxHash,
                 }
                 datatoInsert.push(data);
                 console.log(`Plasma exit saved for ${counter}`)
