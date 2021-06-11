@@ -108,7 +108,7 @@ export const updatePlasmaExits = async () => {
                 findMore = false
             }
 
-            const bulk = Delegators.collection.initializeUnorderedBulkOp()
+            const bulk = PlasmaExits.collection.initializeUnorderedBulkOp()
 
             for (const plasmaExit of plasmaExits) {
                 let { counter } = plasmaExit
