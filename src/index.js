@@ -16,7 +16,7 @@ const swaggerUi = require('swagger-ui-express')
 const { schedule } = require('node-cron')
 const { getAndSavePosDepositTransactions, getAndSaveDepositEtherTransaction } = require('./services/root-deposit')
 const { getAndSavePosExitTransactions } = require('./services/root-exit')
-const { getAndSavePlasmaExits } = require('./services/plasma-exits')
+const { getAndSavePlasmaExits, updatePlasmaExits } = require('./services/plasma-exits')
 
 export const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
 
@@ -97,6 +97,7 @@ const initialise = async() => {
   schedule('0 */10 * * * *', getAndSaveDepositEtherTransaction)
   schedule('0 */5 * * * *', getAndSavePosDepositTransactions)
   schedule('0 */2 * * * *', getAndSavePosExitTransactions)
+  schedule('0 */1 * * *', updatePlasmaExits)
 }
 
 initialise()

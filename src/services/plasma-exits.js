@@ -114,7 +114,7 @@ export const updatePlasmaExits = async () => {
                 let { counter } = plasmaExit
                 const { exitCompletedTxHash } = plasmaExit
                 counter = parseInt(counter, 10)
-                bulk.find({ counter }).upsert().update({ $set: { exitTxHash: exitCompletedTxHash } })
+                bulk.find({ counter }).update({ $set: { exitTxHash: exitCompletedTxHash } })
             }
 
             await bulk.execute()
