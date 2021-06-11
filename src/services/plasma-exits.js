@@ -76,3 +76,52 @@ export const getAndSavePlasmaExits = async () => {
         console.log("error in getting and saving plasma exits", error);
     }
 }
+
+export const getPlasmaExitPosition = async (reqParams) => {
+    try {
+        const { query } = reqParams;
+        const { burnTransactionHash } = reqParams;
+
+        const plasmaExit = await PlasmaExits.findOne({ burnTransactionHash: burnTransactionHash });
+        if (plasmaExit) {
+            const { exitableAt } = plasmaExit
+            const numberOfPlasmaExitsToBeExitedBefore = await PlasmaExits.find({ })
+        } else {
+            return { success: false }
+        }
+    } catch (error) {
+        console.log("error in getting plasma exits", error)
+        return { success: false }
+    }
+}
+
+export const updatePlasmaExits = async () => {
+    try {
+        let start = 0
+        let findMore = true
+        
+        while(findMore) {
+            let plasmaExits = await getPlasmaExitsFromSubgraph(start)
+            if (plasmaExits.length === 1000) {
+                start = start + 1000
+            } else {
+                findMore = false
+            }
+
+            const bulk = Delegators.collection.initializeUnorderedBulkOp()
+
+            for (const plasmaExit of plasmaExits) {
+                let { counter } = plasmaExit
+                const { exitCompletedTxHash } = plasmaExit
+                counter = parseInt(counter, 10)
+                bulk.find({ counter }).upsert().update({ $set: { exitTxHash: exitCompletedTxHash } })
+            }
+
+            await bulk.execute()
+            console.log("Executing bulk plasma update")
+        }
+        
+    } catch (error) {
+        console.log("Error in updating plasma exits", error);
+    }
+}
