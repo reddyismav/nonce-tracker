@@ -93,6 +93,13 @@ const initialise = async() => {
   } catch (error) {
     console.log("error in syncing root deposits")
   }
+
+  try {
+    await updatePlasmaExits()
+    console.log("Updating plasma exits done.")
+  } catch (error) {
+    console.log("error in updating plasma exits")
+  }
   schedule('0 */1 * * *', getAndSavePlasmaExits)
   schedule('0 */10 * * * *', getAndSaveDepositEtherTransaction)
   schedule('0 */5 * * * *', getAndSavePosDepositTransactions)
