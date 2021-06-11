@@ -80,14 +80,18 @@ export const getAndSavePlasmaExits = async () => {
 export const getPlasmaExitPosition = async (reqParams) => {
     try {
         const { query } = reqParams;
-        const { burnTransactionHash } = reqParams;
+        const { burnTransactionHash } = query;
 
         const plasmaExit = await PlasmaExits.findOne({ burnTransactionHash: burnTransactionHash });
         if (plasmaExit) {
-            const { exitableAt } = plasmaExit
-            const numberOfPlasmaExitsToBeExitedBefore = await PlasmaExits.find({ })
+            const { exitableAt: exitableAtConsidered } = plasmaExit
+            const numberOfPlasmaExitsToBeExitedBefore = await PlasmaExits.find({ exitableAt: {$lt: exitableAtConsidered }, exitTxHash: { $eq: null } })
+            return { 
+                success: true, 
+                result: numberOfPlasmaExitsToBeExitedBefore
+            }
         } else {
-            return { success: false }
+            return { success: false, message: "Burn tx does not exist in Database." }
         }
     } catch (error) {
         console.log("error in getting plasma exits", error)
