@@ -88,7 +88,10 @@ export const getPlasmaExitPosition = async (reqParams) => {
             const numberOfPlasmaExitsToBeExitedBefore = await PlasmaExits.count({ exitableAt: {$lt: exitableAtConsidered }, exitTxHash: { $eq: null } })
             return { 
                 success: true, 
-                result: numberOfPlasmaExitsToBeExitedBefore
+                result: {
+                    exitableAt: exitableAtConsidered,
+                    plasmaExitsBefore: numberOfPlasmaExitsToBeExitedBefore
+                }
             }
         } else {
             return { success: false, message: "Burn tx does not exist in Database." }
