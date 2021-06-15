@@ -85,7 +85,7 @@ export const getPlasmaExitPosition = async (reqParams) => {
         const plasmaExit = await PlasmaExits.findOne({ burnTransactionHash: burnTransactionHash });
         if (plasmaExit) {
             const { exitableAt: exitableAtConsidered } = plasmaExit
-            const numberOfPlasmaExitsToBeExitedBefore = await PlasmaExits.find({ exitableAt: {$lt: exitableAtConsidered }, exitTxHash: { $eq: null } })
+            const numberOfPlasmaExitsToBeExitedBefore = await PlasmaExits.count({ exitableAt: {$lt: exitableAtConsidered }, exitTxHash: { $eq: null } })
             return { 
                 success: true, 
                 result: numberOfPlasmaExitsToBeExitedBefore
