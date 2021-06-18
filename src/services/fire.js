@@ -31,12 +31,17 @@ export const getActionRequiredTxDoc = async(params) => {
 export const addActionRequiredTxDoc = async(params) => {
   try {
     const { userAddress, burnTransactionHash, amount, tokenId, isManual } = params.body
-    let firebaseEntry = getActionRequiredTxDoc({ userAddress, burnTransactionHash })
+    let firebaseEntry = await getActionRequiredTxDoc({ userAddress, burnTransactionHash })
     if (firebaseEntry.status === 2) {
       if (!isManual) {
-        await fire.collection('userInfos').doc(userAddress.toLowercase()).collection('actionRequiredTx').where('amount', '==', amount).where('tokenId', '==', tokenId).where('transactionStatus', '==', -1).update({
-          transactionStatus: -21
-        })
+        let trasnsactions = await fire.collection('userInfos').doc(userAddress.toLowerCase()).collection('actionRequiredTx').where('amount', '==', amount).where('tokenId', '==', tokenId).where('transactionStatus', '==', -1).get()
+        for (const transaction of trasnsactions.docs) {
+          const txHash = transaction.data().txHash
+          await fire.collection('userInfos').doc(userAddress.toLowerCase()).collection('actionRequiredTx').doc(txHash).update({
+            transactionStatus: -21,
+            updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp()
+          })
+        }
       }
 
       let newFirebaseEntry = await fire.collection('userInfos').doc(userAddress.toLowerCase()).collection('actionRequiredTx').doc(burnTransactionHash.toLowerCase()).set({

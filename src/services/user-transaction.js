@@ -34,7 +34,7 @@ export const findUserBurnTransactions = async(params) => {
     const web3 = new Web3(process.env.MATIC_NETWORK_PROVIDER)
 
     const currentBlock = await web3.eth.getBlockNumber()
-    const startBlock = currentBlock - 400000
+    const startBlock = currentBlock - 5000
 
     const userBurnTransactionsResponse = await findUserBurnTransactionsFromCovalent({ userAddress, startBlock, endBlock: currentBlock })
     if (!userBurnTransactionsResponse.success) {
