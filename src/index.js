@@ -18,16 +18,19 @@ const { getAndSavePosDepositTransactions, getAndSaveDepositEtherTransaction } = 
 const { getAndSavePosExitTransactions } = require('./services/root-exit')
 const { getAndSavePlasmaExits, updatePlasmaExits } = require('./services/plasma-exits')
 const { getAndSavePoSTokenIdMappings } = require('./services/fire')
+const { findUserBurnTransactions } = require('./services/user-transaction')
 
 export const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
 
 const mongoose = require('mongoose')
 
 // DB connection
-if (process.env.NODE_ENV === 'local') {
-  mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }).then(console.log('Connected to DB'))
-} else {
-  mongoose.connect(process.env.MONGO_CONNECTION_PROD, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, sslCA: [fs.readFileSync('rds-combined-ca-bundle.pem')] }).then(console.log('Connected to DB'))
+const connectDb = async () => {
+  if (process.env.NODE_ENV === 'local') {
+    await mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }).then(console.log('Connected to DB'))
+  } else {
+    await mongoose.connect(process.env.MONGO_CONNECTION_PROD, { useFindAndModify: false, useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, sslCA: [fs.readFileSync('rds-combined-ca-bundle.pem')] }).then(console.log('Connected to DB'))
+  }
 }
 
 // created express server
@@ -69,6 +72,8 @@ app.listen(process.env.PORT, function() {
 
 // Initialisation and Syncing Function
 const initialise = async() => {
+  await connectDb()
+
   try {
     await getAndSavePoSTokenIdMappings()
   } catch (error) {
