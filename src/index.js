@@ -25,7 +25,7 @@ export const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
 const mongoose = require('mongoose')
 
 // DB connection
-const connectDb = async () => {
+const connectDb = async() => {
   if (process.env.NODE_ENV === 'local') {
     await mongoose.connect(process.env.MONGO_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }).then(console.log('Connected to DB'))
   } else {
