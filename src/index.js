@@ -17,6 +17,7 @@ const { schedule } = require('node-cron')
 const { getAndSavePosDepositTransactions, getAndSaveDepositEtherTransaction } = require('./services/root-deposit')
 const { getAndSavePosExitTransactions } = require('./services/root-exit')
 const { getAndSavePlasmaExits, updatePlasmaExits } = require('./services/plasma-exits')
+const { getAndSavePoSTokenIdMappings } = require('./services/fire')
 
 export const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
 
@@ -68,6 +69,12 @@ app.listen(process.env.PORT, function() {
 
 // Initialisation and Syncing Function
 const initialise = async() => {
+  try {
+    await getAndSavePoSTokenIdMappings()
+  } catch (error) {
+    console.log("error in saving mapping details")
+  }
+
   try {
     await getAndSavePlasmaExits()
   } catch (error) {

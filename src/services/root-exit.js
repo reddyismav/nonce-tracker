@@ -28,12 +28,12 @@ export const getAndSavePosExitTransactions = async() => {
           counter
         } = exit
         const burnTransactionResult = await mapWithdrawTxToBurnTx(transactionHash, true, null, true)
-        if (!burnTransactionResult) throw new Error("error in getting burntransaction")
+        if (!burnTransactionResult) throw new Error('error in getting burntransaction')
         const burnTransactionHash = burnTransactionResult.result.toLowerCase()
         const data = {
           transactionHash,
           burnTransactionHash,
-          timestamp,
+          timestamp
         }
         datatoInsert.push(data)
         console.log('Exit counter', counter)
@@ -68,14 +68,14 @@ export const getExitsFromSubgraph = async(start) => {
 export const checkExitTransactionIfReplaced = async(reqParams) => {
   try {
     let { burnTransactionHash, isPos } = reqParams.query
-    console.log(isPos, typeof(isPos))
+    console.log(isPos, typeof (isPos))
     burnTransactionHash = burnTransactionHash.toLowerCase()
     let rootExit
     if (isPos === 'true') {
-      console.log("pos")
+      console.log('pos')
       rootExit = await RootExits.findOne({ burnTransactionHash })
     } else {
-      console.log("plasma")
+      console.log('plasma')
       rootExit = await PlasmaExits.findOne({ burnTransactionHash })
     }
     let response

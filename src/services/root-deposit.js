@@ -34,7 +34,7 @@ export const getAndSavePosDepositTransactions = async() => {
         const transactionDetails = await mainnetWeb3.eth.getTransaction(transactionHash)
         // console.log("transactionDetails", transactionDetails)
         const { input, blockNumber, from: fromAddress } = transactionDetails
-        let data;
+        let data
         const code = await mainnetWeb3.eth.getCode(fromAddress)
         if (code === '0x') {
           const decodedAbiDataResponse = await getParsedTxDataFromAbiDecoder(input, ROOT_CHAIN_MANAGER_ABI.abi)
@@ -42,7 +42,7 @@ export const getAndSavePosDepositTransactions = async() => {
           const decodedInputData = decodedAbiDataResponse.result
           if (decodedInputData) {
             const depositData = decodedInputData.params[2].value
-            const amount = await mainnetWeb3.eth.abi.decodeParameter('uint256', depositData).toString();
+            const amount = await mainnetWeb3.eth.abi.decodeParameter('uint256', depositData).toString()
             data = {
               transactionHash,
               timestamp,
@@ -51,7 +51,7 @@ export const getAndSavePosDepositTransactions = async() => {
               amount,
               counter,
               blockNumber,
-              isDecoded: true,
+              isDecoded: true
             }
             datatoInsert.push(data)
           } else {
@@ -63,7 +63,7 @@ export const getAndSavePosDepositTransactions = async() => {
               // amount,
               counter,
               blockNumber,
-              isDecoded: false,
+              isDecoded: false
             }
             datatoInsert.push(data)
           }
@@ -76,7 +76,7 @@ export const getAndSavePosDepositTransactions = async() => {
             // amount,
             counter,
             blockNumber,
-            isDecoded: false,
+            isDecoded: false
           }
           datatoInsert.push(data)
         }
@@ -138,12 +138,12 @@ export const checkDepositTransactionIfReplaced = async(reqParams) => {
     let { transactionHash: initialTransactionHash, userAddress, amount, isEther, rootToken } = reqParams.query
     let rootDeposit
     if (isEther === 'true') {
-      rootDeposit = await RootDepositEther.findOne({ resolveTransaction: initialTransactionHash, isResolved:true })
+      rootDeposit = await RootDepositEther.findOne({ resolveTransaction: initialTransactionHash, isResolved: true })
       if (!rootDeposit) {
         rootDeposit = await RootDepositEther.findOne({ userAddress, amount, isResolved: false })
       }
     } else {
-      rootDeposit = await RootDeposits.findOne({ resolveTransaction: initialTransactionHash, isResolved:true })
+      rootDeposit = await RootDeposits.findOne({ resolveTransaction: initialTransactionHash, isResolved: true })
       if (!rootDeposit) {
         rootDeposit = await RootDeposits.findOne({ userAddress, amount, rootToken, isResolved: false })
       }
@@ -155,7 +155,7 @@ export const checkDepositTransactionIfReplaced = async(reqParams) => {
         success: true,
         status: 1,
         initialTransactionHash,
-        newTransactionHash: transactionHash,
+        newTransactionHash: transactionHash
       }
       if (isEther === 'true') {
         await RootDepositEther.findOneAndUpdate({ counter }, { resolveTransaction: initialTransactionHash, isResolved: true })
@@ -180,7 +180,7 @@ export const checkDepositTransactionIfReplaced = async(reqParams) => {
   }
 }
 
-export const getAndSaveDepositEtherTransaction = async () => {
+export const getAndSaveDepositEtherTransaction = async() => {
   try {
     const mainnetWeb3 = new Web3(process.env.ETH_NETWORK_PROVIDER)
     let start = await RootDepositEther.countDocuments()
@@ -210,7 +210,7 @@ export const getAndSaveDepositEtherTransaction = async () => {
           userAddress,
           amount,
           counter,
-          isResolved: false,
+          isResolved: false
         }
         datatoInsert.push(data)
         console.log('Deposit counter', counter)
@@ -219,6 +219,6 @@ export const getAndSaveDepositEtherTransaction = async () => {
       await RootDepositEther.insertMany(datatoInsert)
     }
   } catch (error) {
-    console.log("error in get and save deposit ether transactions", error)
+    console.log('error in get and save deposit ether transactions', error)
   }
 }
