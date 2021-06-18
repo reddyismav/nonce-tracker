@@ -26,9 +26,9 @@ export const findUserBurnTransactionsFromCovalent = async (params) => {
     }
 }
 
-export const findUserBurnTransactions = async (params) => {
+export const findUserBurnTransactions = async (reqParams) => {
     try {
-        const { userAddress } = params
+        const { userAddress } = params.query
         if (!userAddress) {
             throw new Error("User Address is required")
         }
@@ -58,7 +58,14 @@ export const findUserBurnTransactions = async (params) => {
                 if (tokenId && childTokenAddress && valueToSend && txHash) {
 
                 }
-                const promiseObject = addActionRequiredTxDoc({ userAddress, burnTransactionHash: txHash, tokenId, amount: valueToSend})
+                const body = {
+                    userAddress, 
+                    burnTransactionHash: txHash, 
+                    tokenId, 
+                    amount: valueToSend,
+                    isManual: false
+                }
+                const promiseObject = addActionRequiredTxDoc({ body })
                 promiseArray.push(promiseObject)
             }
             await Promise.all(promiseArray)

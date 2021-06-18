@@ -30,13 +30,14 @@ export const getActionRequiredTxDoc = async(params) => {
 
 export const addActionRequiredTxDoc = async(params) => {
   try {
-    const { userAddress, burnTransactionHash, amount, tokenId } = params
-
+    const { userAddress, burnTransactionHash, amount, tokenId, isManual } = params.body
     let firebaseEntry = getActionRequiredTxDoc({ userAddress, burnTransactionHash })
     if (firebaseEntry.status === 2) {
-      await fire.collection('userInfos').doc(userAddress.toLowercase()).collection('actionRequiredTx').where("amount", '==', amount).where("tokenId", '==', tokenId).where("transactionStatus",'==',-1).update({
-        transactionStatus: -21
-      })
+      if (!isManual) {
+        await fire.collection('userInfos').doc(userAddress.toLowercase()).collection('actionRequiredTx').where("amount", '==', amount).where("tokenId", '==', tokenId).where("transactionStatus",'==',-1).update({
+          transactionStatus: -21
+        })
+      }
 
       let newFirebaseEntry = await fire.collection('userInfos').doc(userAddress.toLowercase()).collection('actionRequiredTx').doc(burnTransactionHash.toLowercase()).set({
         wappId: 'polygon wallet',
@@ -48,7 +49,7 @@ export const addActionRequiredTxDoc = async(params) => {
         createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp()
       })
-      
+
       return { success: true, result: newFirebaseEntry }
     } else {
       return firebaseEntry
@@ -63,10 +64,11 @@ export const getAndSavePoSTokenIdMappings = async() => {
   try {
     let mappings = await fire.collection('posERC20TokenList').get()
     const bulk = TokenMappings.collection.initializeUnorderedBulkOp()
+  
     for (const doc of mappings.docs) {
       const data = {
-        rootTokenAddress: doc.data().addresses['1'].toLowercase(),
-        childTokenAddress: doc.data().addresses['137'].toLowercase(),
+        rootTokenAddress: doc.data().addresses['1'],
+        childTokenAddress: doc.data().addresses['137'],
         name: doc.data().name,
         symbol: doc.data().symbol,
         decimals: doc.data().decimals,
