@@ -75,3 +75,26 @@ export const findUserBurnTransactions = async (reqParams) => {
         return { success: false }
     }
 }
+
+export const findPastBurnLogs = async (params) => {
+    try {
+        const { userAddress } = params
+        const userAddressByte = '0x000000000000000000000000' + userAddress.slice(2,66)
+        const web3 = new Web3(process.env.MATIC_NETWORK_PROVIDER)
+
+        const topicsArray = ["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",userAddressByte,"0x0000000000000000000000000000000000000000000000000000000000000000"]
+        const currentBlock = await web3.eth.getBlockNumber()
+        const startBlock = currentBlock - 64800
+        const logs = await web3.eth.getPastLogs({
+            fromBlock: startBlock,
+            toBlock: currentBlock,
+            topics: topicsArray
+        })
+
+        console.log(logs)
+    } catch (error) {
+        console.log("error in finding past logs of the user", error)
+    }
+}
+
+// https://api.covalenthq.com/v1/137/events/topics/0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef/?&starting-block=14653920&sender-address=0x7ceb23fd6bc0add59e62ac25578270cff1b9f619&ending-block=14773922&key=ckey_2230602b71244a05a42158400f7&match={%20%22$and%22:%20[%20{%20%22decoded.params.0.value%22:%20%220xfd71dc9721d9ddcf0480a582927c3dcd42f3064c%22%20},%20{%20%22decoded.params.1.value%22:%20%220x0000000000000000000000000000000000000000%22%20}%20]%20}

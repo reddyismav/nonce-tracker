@@ -18,7 +18,7 @@ const { getAndSavePosDepositTransactions, getAndSaveDepositEtherTransaction } = 
 const { getAndSavePosExitTransactions } = require('./services/root-exit')
 const { getAndSavePlasmaExits, updatePlasmaExits } = require('./services/plasma-exits')
 const { getAndSavePoSTokenIdMappings } = require('./services/fire')
-const { findUserBurnTransactions } = require('./services/user-transaction')
+const { findUserBurnTransactions, findPastBurnLogs } = require('./services/user-transaction')
 
 export const mainnetWeb3 = new Web3(process.env.NETWORK_PROVIDER)
 
@@ -73,7 +73,7 @@ app.listen(process.env.PORT, function() {
 // Initialisation and Syncing Function
 const initialise = async() => {
   await connectDb()
-
+  await findPastBurnLogs({userAddress:"0xfd71dc9721d9ddcf0480a582927c3dcd42f3064c"})
   try {
     await getAndSavePoSTokenIdMappings()
   } catch (error) {
