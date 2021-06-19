@@ -12,7 +12,7 @@ export const getActionRequiredTxDoc = async(params) => {
   try {
     const { userAddress, burnTransactionHash } = params
 
-    let firebaseEntry = await fire.collection('userInfos').doc(userAddress.toLowercase()).collection('actionRequiredTx').doc(burnTransactionHash.toLowercase()).get()
+    let firebaseEntry = await fire.collection('userInfos').doc(userAddress.toLowerCase()).collection('actionRequiredTx').doc(burnTransactionHash.toLowerCase()).get()
     if (firebaseEntry.data()) {
       return {
         success: true,
@@ -31,17 +31,22 @@ export const getActionRequiredTxDoc = async(params) => {
 export const addActionRequiredTxDoc = async(params) => {
   try {
     const { userAddress, burnTransactionHash, amount, tokenId, isManual } = params.body
-    let firebaseEntry = getActionRequiredTxDoc({ userAddress, burnTransactionHash })
+    let firebaseEntry = await getActionRequiredTxDoc({ userAddress, burnTransactionHash })
     if (firebaseEntry.status === 2) {
       if (!isManual) {
-        await fire.collection('userInfos').doc(userAddress.toLowercase()).collection('actionRequiredTx').where("amount", '==', amount).where("tokenId", '==', tokenId).where("transactionStatus",'==',-1).update({
-          transactionStatus: -21
-        })
+        let trasnsactions = await fire.collection('userInfos').doc(userAddress.toLowerCase()).collection('actionRequiredTx').where('amount', '==', amount).where('tokenId', '==', tokenId).where('transactionStatus', '==', -1).get()
+        for (const transaction of trasnsactions.docs) {
+          const txHash = transaction.data().txHash
+          await fire.collection('userInfos').doc(userAddress.toLowerCase()).collection('actionRequiredTx').doc(txHash).update({
+            transactionStatus: -21,
+            updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp()
+          })
+        }
       }
 
-      let newFirebaseEntry = await fire.collection('userInfos').doc(userAddress.toLowercase()).collection('actionRequiredTx').doc(burnTransactionHash.toLowercase()).set({
+      let newFirebaseEntry = await fire.collection('userInfos').doc(userAddress.toLowerCase()).collection('actionRequiredTx').doc(burnTransactionHash.toLowerCase()).set({
         wappId: 'polygon wallet',
-        txHash: burnTransactionHash.toLowercase(),
+        txHash: burnTransactionHash.toLowerCase(),
         amount: amount,
         tokenId: tokenId,
         isPoS: true,
@@ -64,21 +69,20 @@ export const getAndSavePoSTokenIdMappings = async() => {
   try {
     let mappings = await fire.collection('posERC20TokenList').get()
     const bulk = TokenMappings.collection.initializeUnorderedBulkOp()
-  
+
     for (const doc of mappings.docs) {
       const data = {
-        rootTokenAddress: doc.data().addresses['1'],
-        childTokenAddress: doc.data().addresses['137'],
+        rootTokenAddress: doc.data().addresses['1'].toLowerCase(),
+        childTokenAddress: doc.data().addresses['137'].toLowerCase(),
         name: doc.data().name,
         symbol: doc.data().symbol,
         decimals: doc.data().decimals,
         tokenId: doc.data().id
       }
-      console.log(doc.data().addresses['137'])
       bulk.find({ childTokenAddress: doc.data().addresses['137'] }).upsert().update({ $set: data })
     }
     await bulk.execute()
-    console.log("Complete token mapper syncing")
+    console.log('Complete token mapper syncing')
   } catch (error) {
     console.log('error in saving tokenmappings entry', error)
     return { success: false, status: 0 }
