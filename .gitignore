@@ -9,3 +9,4 @@ pids/
 *.rdb
 .idea/
 package-lock.json
+serviceAccountKeyMainnet.json
